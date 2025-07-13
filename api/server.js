@@ -1,42 +1,25 @@
 import express from "express";
+import { GoogleGenAI  } from "@google/genai";
 import dotenv from "dotenv";
-import cors from "cors";
-import fs from "fs";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { buildPrompt } from "./promptBuilder.js";
-
 dotenv.config();
+
 const app = express();
-app.use(cors());
 app.use(express.json());
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const ai = new GoogleGenAI (process.env.GEMINI_API_KEY);
 
-function getProductByCode(code) {
-  const products = JSON.parse(fs.readFileSync("./data/products.json", "utf-8"));
-  return products[code];
-}
-
-app.post("/api/recommend", async (req, res) => {
-  const { itemCode } = req.body;
-  const product = getProductByCode(itemCode);
-  if (!product) return res.status(404).json({ error: "Item not found" });
-
-  const prompt = buildPrompt(product);
+app.post("/ask", async (req, res) => {
+  const { prompt } = req.body;
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-
-    // Extract JSON from the response
-    const jsonStart = text.indexOf("{");
-    const jsonEnd = text.lastIndexOf("}") + 1;
-    const data = JSON.parse(text.slice(jsonStart, jsonEnd));
-
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: "You are an expert in sustainable packaging and environmental impact assessment.\n\nGiven a product with the following details:\n- Item Code: 12345\n- Product Type: cosmetics\n- Weight: 200 grams\n- Dimensions: 12cmX12cmX12cm (L x W x H)\n\nYour task is to recommend the best 2 sustainable packaging option based on:\n- Low carbon footprint\n- Cost-effectiveness\n- Recyclability or biodegradability\n\nReturn your answer in the following in json format:\n\n---\n*🌿 Recommended Packaging:*  \n{{PACKAGING_TYPE}} (e.g., Recycled cardboard box with paper filler)\n\n*📉 Estimated Carbon Footprint:*  \n{{CARBON_EMISSION}} kg CO₂ per unit\n\n*💰 Estimated Cost:*  \n₹{{COST}} per unit\n\n*♻ Eco Score (1–100):*  \n{{SCORE}} (based on emissions, cost, and sustainability)\n\n*📚 Reasoning:*  \n{{WHY_THIS_IS_GOOD}}\n\n*🔗 Citation/Source:*  \n{{CITATION}}\n---\n\nOnly suggest real and commonly available packaging materials in India. Keep it concise and user-friendly.",
+    });
+    let responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    res.json(JSON.parse(responseText.replace(/```json|```/g, "").trim()));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
-app.listen(3000, () => console.log("Backend running on http://localhost:3000"));
+app.listen(3000, () => console.log("Server running on port 3000"));
