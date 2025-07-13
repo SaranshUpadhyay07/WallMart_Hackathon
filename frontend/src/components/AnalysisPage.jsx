@@ -3,38 +3,34 @@ import { ArrowLeft, Search, Loader2, Package, AlertCircle } from 'lucide-react';
 import Dashboard from './Dashboard';
 
 const AnalysisPage = ({ onNavigateToLanding }) => {
-  const [itemCode, setItemCode] = useState('');
+  const [itemCodes, setItemCodes] = useState([]);
+  const [newItemCode, setNewItemCode] = useState('');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const fetchRecommendation = async () => {
-    if (!itemCode.trim()) {
-      setError('Please enter an item code');
-      return;
-    }
-
     setLoading(true);
     setError('');
-    
+    setData(null);
     try {
-      const response = await fetch('http://localhost:3000/api/recommend', {
+      const response = await fetch('/api/recommend', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ itemCode: itemCode.trim() }),
+        body: JSON.stringify({
+          itemCodes: itemCodes.filter(code => code.trim() !== ''),
+        }),
       });
-
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Failed to fetch recommendations');
       }
-
-      const result = await response.json();
-      setData(result);
-    } catch (err) {
-      console.error('Error fetching recommendation:', err);
-      setError('Failed to get recommendation. Please check your connection and try again.');
+      const data = await response.json();
+      setData(data);
+    } catch (error) {
+      setError('Error fetching recommendation.');
+      console.error('Error fetching recommendation:', error);
     } finally {
       setLoading(false);
     }
@@ -43,6 +39,18 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     fetchRecommendation();
+  };
+
+  const handleAddItemCode = () => {
+    const code = newItemCode.trim();
+    if (code && !itemCodes.includes(code)) {
+      setItemCodes((prev) => [...prev, code]);
+      setNewItemCode('');
+    }
+  };
+
+  const handleRemoveItemCode = (idx) => {
+    setItemCodes((prev) => prev.filter((_, i) => i !== idx));
   };
 
   return (
@@ -83,20 +91,49 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="itemCode" className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Item Code
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Item Codes
                 </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    id="itemCode"
-                    type="text"
-                    value={itemCode}
-                    onChange={(e) => setItemCode(e.target.value)}
-                    placeholder="Enter item code (e.g. SKU123, PROD456)"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                    disabled={loading}
-                  />
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className="relative w-full">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={newItemCode}
+                      onChange={(e) => setNewItemCode(e.target.value)}
+                      placeholder="Enter item code"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                      disabled={loading}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddItemCode}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-semibold disabled:opacity-50"
+                    disabled={loading || !newItemCode.trim()}
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {itemCodes.map((code, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center bg-green-100 border border-green-300 rounded-full px-3 py-1 text-green-800 text-sm font-medium relative shadow-sm"
+                    >
+                      <span>{code}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveItemCode(idx)}
+                        className="ml-2 text-green-600 hover:text-red-600 font-bold rounded-full focus:outline-none focus:ring-2 focus:ring-red-400"
+                        style={{ lineHeight: 1, fontSize: '1.1em', position: 'relative', top: '-2px' }}
+                        aria-label="Remove item code"
+                        disabled={loading}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -109,18 +146,18 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
 
               <button
                 type="submit"
-                disabled={loading || !itemCode.trim()}
+                disabled={loading || itemCodes.length === 0}
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-6 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
               >
                 {loading ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>Analyzing...</span>
+                    <span>Packing...</span>
                   </>
                 ) : (
                   <>
-                    <Search className="h-5 w-5" />
-                    <span>Get Recommendations</span>
+                    <Package className="h-5 w-5" />
+                    <span>Pack Them</span>
                   </>
                 )}
               </button>
@@ -138,8 +175,8 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
                 <p className="text-gray-600">Our AI is evaluating sustainable packaging options...</p>
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             </div>
