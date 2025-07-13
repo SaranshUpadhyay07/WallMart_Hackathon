@@ -56,6 +56,7 @@ Return your response in this JSON format:
 [
   {
     "group_description": "Grouped item categories (e.g., Cosmetics + Jewelry)",
+    "group_items": "name of items in this group, e.g., Face Cream Jar, Silver Earrings",
     "packaging_type": "Short packaging name only",
     "estimated_total_footprint_kg": 2.5,
     "eco_score": 90,
