@@ -1,0 +1,10 @@
+{
+  "ITEM001": {
+    "name": "Wine Glass",
+    "dimensions": [20, 10, 10],
+    "weight": 0.5,
+    "fragility": "High",
+    "category": "Glassware",
+    "sales_volume": 1200
+  }
+}
