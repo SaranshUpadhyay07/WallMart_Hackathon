@@ -2,6 +2,7 @@ import express from "express";
 import { GoogleGenAI  } from "@google/genai";
 import dotenv from "dotenv";
 import products from "./products.js";
+import userRoutes from './routes/user.js';
 dotenv.config();
 
 const app = express();
@@ -97,4 +98,18 @@ Return your answer strictly in this JSON format:
   }
 });
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+app.use('/user', userRoutes);
+
+import connectDB from "./db/connect.js";
+
+async function start() {
+  try {
+    await connectDB(process.env.mongodb);
+    console.log("DB connected");
+    app.listen(3000, () => console.log("Server running on port 3000"));
+  } catch (err) {
+    console.error("Startup Error:", err);
+  }
+}
+
+start();

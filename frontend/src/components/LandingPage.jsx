@@ -1,8 +1,22 @@
-import React from 'react';
-import { Leaf, Recycle, Shield, Award, ArrowRight, Package, Globe, Users } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Leaf, Recycle, Shield, Award, Package, Globe, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const LandingPage = ({ onNavigateToAnalysis, onNavigateToDashboard, onNavigateToPackageOptimizer }) => {
+const LandingPage = ({ onNavigateToAnalysis, onNavigateToDashboard, onNavigateToRecyclePage, onAddUser, onUserDetails }) => {
+  const [recycleOpen, setRecycleOpen] = useState(false);
+  const recycleRef = useRef(null);
+
+  // Close dropdown if clicked outside
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (recycleRef.current && !recycleRef.current.contains(event.target)) {
+        setRecycleOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -15,25 +29,39 @@ const LandingPage = ({ onNavigateToAnalysis, onNavigateToDashboard, onNavigateTo
               </div>
               <span className="text-xl font-bold text-gray-800">EcoPackage AI</span>
             </div>
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex space-x-8 items-center">
               <a href="#features" className="text-gray-600 hover:text-green-600 transition-colors py-2">Features</a>
               <a href="#how-it-works" className="text-gray-600 hover:text-green-600 transition-colors py-2">How It Works</a>
               <a href="#impact" className="text-gray-600 hover:text-green-600 transition-colors py-2">Impact</a>
+              {/* Reuse Dropdown */}
+              <div className="relative" ref={recycleRef}>
+                <button
+                  onClick={() => setRecycleOpen((v) => !v)}
+                  className="group bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-2 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
+                >
+                  <Recycle className="h-5 w-5" />
+                  <span>Reuse</span>
+                </button>
+                {recycleOpen && (
+                  <div className="absolute left-0 mt-2 w-48 bg-white border border-green-200 rounded-xl shadow-lg z-50 flex flex-col">
+                    <button
+                      className="px-4 py-2 text-left hover:bg-green-50 rounded-t-xl"
+                      onClick={() => { setRecycleOpen(false); onAddUser && onAddUser(); }}
+                    >Add User</button>
+                    <button
+                      className="px-4 py-2 text-left hover:bg-green-50 rounded-b-xl"
+                      onClick={() => { setRecycleOpen(false); onUserDetails && onUserDetails(); }}
+                    >User Details</button>
+                  </div>
+                )}
+              </div>
+              {/* Dashboard button */}
               <button
                 onClick={onNavigateToDashboard}
                 className="group bg-gradient-to-r from-emerald-600 to-green-600 text-white px-3 py-2 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
               >
                 <Package className="h-5 w-5" />
-                <span>Go to Dashboard</span>
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button
-                onClick={onNavigateToPackageOptimizer}
-                className="group bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-2 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
-              >
-                <Globe className="h-5 w-5" />
-                <span>Package Optimizer</span>
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <span>Dashboard</span>
               </button>
             </nav>
           </div>
@@ -67,7 +95,6 @@ const LandingPage = ({ onNavigateToAnalysis, onNavigateToDashboard, onNavigateTo
               >
                 <Package className="h-5 w-5" />
                 <span>Analyze Your Product</span>
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
@@ -212,7 +239,6 @@ const LandingPage = ({ onNavigateToAnalysis, onNavigateToDashboard, onNavigateTo
           >
             <Package className="h-5 w-5" />
             <span>Start Free Analysis</span>
-            <ArrowRight className="h-5 w-5" />
           </button>
         </div>
       </section>
