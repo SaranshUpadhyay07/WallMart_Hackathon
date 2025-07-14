@@ -1,45 +1,108 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function AdminLogin({ onSuccess, onClose }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+const AdminLogin = () => {
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username && password) {
-      onSuccess();
-    } else {
-      setError('Please enter username and password');
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Invalid credentials");
+        return;
+      }
+
+      // Optional: Save user to localStorage or Redux
+      // localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Navigate to dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      setError("Something went wrong");
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <form className="bg-white p-8 rounded-xl shadow-lg flex flex-col gap-4 w-80" onSubmit={handleSubmit}>
-        <h2 className="text-xl font-bold">Admin Login</h2>
-        <input
-          className="border p-2 rounded"
-          placeholder="Username"
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-          required
-        />
-        <input
-          className="border p-2 rounded"
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
-        <button className="bg-green-600 text-white py-2 rounded hover:bg-green-700" type="submit">
-          Login
-        </button>
-        {error && <div className="text-red-600 text-sm">{error}</div>}
-        <button type="button" className="text-gray-500 underline mt-2" onClick={onClose}>Close</button>
-      </form>
+    <div className="flex items-center justify-center h-screen bg-green-50 px-4">
+      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+        <h2 className="text-2xl font-bold text-center text-green-700 mb-6">
+          Login to EcoPackage AI
+        </h2>
+
+        {error && (
+          <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-700 text-sm mb-1">Username</label>
+            <input
+              name="username"
+              type="text"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Enter your username"
+              required
+              className="w-full border px-3 py-2 rounded-md outline-green-500"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 text-sm mb-1">Password</label>
+            <input
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              required
+              className="w-full border px-3 py-2 rounded-md outline-green-500"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md transition"
+          >
+            Sign In
+          </button>
+        </form>
+
+        <p className="text-sm text-center text-gray-500 mt-6">
+          Don’t have an account?{" "}
+          <a href="/signup" className="text-green-600 hover:underline">
+            Sign Up
+          </a>
+        </p>
+      </div>
     </div>
   );
-}
+};
 
+export default AdminLogin;

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Leaf, Recycle, Shield, Award, Package, Globe, Users } from 'lucide-react';
+import { Leaf, Recycle, Shield, Award, Package, Globe, Users,LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const LandingPage = ({ onNavigateToAnalysis }) => {
@@ -36,8 +36,8 @@ const LandingPage = ({ onNavigateToAnalysis }) => {
                   onClick={() => setRecycleOpen((v) => !v)}
                   className="group bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-2 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
                 >
-                  <Recycle className="h-5 w-5" />
-                  <span>Reuse</span>
+                  <LogIn className="h-5 w-5" />
+                  <span>Login</span>
                 </button>
                 {recycleOpen && (
                   <div className="absolute left-0 mt-2 w-56 bg-white border border-green-200 rounded-xl shadow-lg z-50 flex flex-col">
