@@ -1,8 +1,121 @@
 import React, { useState } from 'react';
 
-export default function RecyclePage({ mode, onClose }) {
+export default function RecyclePage({ mode, onClose, adminNumber }) {
   const [showCreate, setShowCreate] = useState(mode === 'create');
   const [showDashboard, setShowDashboard] = useState(mode === 'details');
+  const [showAdminAdd, setShowAdminAdd] = useState(mode === 'admin');
+  const [number, setNumber] = useState(adminNumber || '');
+  const [password, setPassword] = useState('');
+  const [boxes, setBoxes] = useState('');
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setResult(null);
+    try {
+      const res = await fetch('http://localhost:3000/user/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, number, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create user');
+      setResult(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUser = async () => {
+    setLoading(true);
+    setError('');
+    setUser(null);
+    setActionResult(null);
+    try {
+      const res = await fetch(`http://localhost:3000/user?number=${number}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'User not found');
+      setUser(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAction = async (type) => {
+    setLoading(true);
+    setError('');
+    setActionResult(null);
+    try {
+      const res = await fetch(`http://localhost:3000/user/${type}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number, boxes: Number(boxes), password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Action failed');
+      setActionResult(data);
+      setUser(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setBoxes(0);
+      setAction('');
+    }
+  };
+
+  if (showAdminAdd) {
+    return (
+      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <form className="bg-white p-8 rounded-xl shadow-lg flex flex-col gap-4 w-96" onSubmit={async e => {
+          e.preventDefault();
+          setLoading(true);
+          setError('');
+          setResult(null);
+          try {
+            const res = await fetch('http://localhost:3000/user/add', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ number, boxes: Number(boxes) })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to add boxes');
+            setResult(data);
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        }}>
+          <h2 className="text-2xl font-bold mb-2 text-green-800">Add Boxes (Admin)</h2>
+          <div className="text-gray-600 mb-4">Add boxes to user: <b>{number}</b></div>
+          <input
+            className="border p-2 rounded"
+            placeholder="Boxes to Add"
+            type="number"
+            min="1"
+            value={boxes}
+            onChange={e => setBoxes(e.target.value)}
+            required
+          />
+          <button className="bg-green-600 text-white py-2 rounded hover:bg-green-700" type="submit" disabled={loading}>
+            {loading ? 'Adding...' : 'Add Boxes'}
+          </button>
+          {result && <div className="text-green-700 text-sm">Success! Boxes added for {result.name} ({result.number})</div>}
+          {error && <div className="text-red-600 text-sm">{error}</div>}
+          <button type="button" className="text-gray-500 underline mt-2" onClick={onClose}>Close</button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
@@ -38,6 +151,7 @@ export default function RecyclePage({ mode, onClose }) {
 function CreateUserForm({ onClose }) {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const [password, setPassword] = useState('');
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -51,7 +165,7 @@ function CreateUserForm({ onClose }) {
       const res = await fetch('http://localhost:3000/user/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, number })
+        body: JSON.stringify({ name, number, password })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create user');
@@ -81,6 +195,14 @@ function CreateUserForm({ onClose }) {
           onChange={e => setNumber(e.target.value)}
           required
         />
+        <input
+          className="border p-2 rounded"
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
         <button
           className="bg-green-600 text-white py-2 rounded hover:bg-green-700"
           type="submit"
@@ -103,6 +225,7 @@ function UserDashboard({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [action, setAction] = useState('');
   const [boxes, setBoxes] = useState(0);
+  const [password, setPassword] = useState('');
   const [actionResult, setActionResult] = useState(null);
 
   const fetchUser = async () => {
@@ -130,7 +253,7 @@ function UserDashboard({ onClose }) {
       const res = await fetch(`http://localhost:3000/user/${type}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ number, boxes: Number(boxes) })
+        body: JSON.stringify({ number, boxes: Number(boxes), password })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Action failed');
@@ -189,6 +312,14 @@ function UserDashboard({ onClose }) {
               placeholder={action === 'add' ? 'Boxes to Add' : 'Boxes to Claim'}
               value={boxes}
               onChange={e => setBoxes(e.target.value)}
+            />
+            <input
+              className="border p-2 rounded"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
             />
             <button
               className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
