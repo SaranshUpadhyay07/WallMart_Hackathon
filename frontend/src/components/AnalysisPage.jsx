@@ -133,7 +133,7 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
                     value={newQuantity}
                     onChange={e => setNewQuantity(e.target.value)}
                     placeholder="Qty"
-                    className="w-24 pl-3 pr-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                    className="w-10 pl-3 pr-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                     disabled={loading}
                   />
                   <button
