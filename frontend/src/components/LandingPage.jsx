@@ -26,7 +26,7 @@ const LandingPage = ({ onNavigateToAnalysis }) => {
               <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-lg">
                 <Leaf className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-800">EcoPackage AI</span>
+              <span className="text-xl font-bold text-gray-800">EcoPackage</span>
             </div>
             <nav className="hidden md:flex space-x-8 items-center">
               <a href="#how-it-works" className="text-gray-600 hover:text-green-600 transition-colors py-2">How It Works</a>
@@ -59,13 +59,6 @@ const LandingPage = ({ onNavigateToAnalysis }) => {
                   </div>
                 )}
               </div>
-              <Link
-                to="/dashboard"
-                className="group bg-gradient-to-r from-emerald-600 to-green-600 text-white px-3 py-2 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
-              >
-                <Package className="h-5 w-5" />
-                <span>Dashboard</span>
-              </Link>
             </nav>
           </div>
         </div>
@@ -97,7 +90,7 @@ const LandingPage = ({ onNavigateToAnalysis }) => {
                 className="group bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
               >
                 <Package className="h-5 w-5" />
-                <span>Analyze Your Product</span>
+                <span>Get Packing Solutions</span>
               </Link>
             </div>
           </div>
@@ -216,11 +209,15 @@ const LandingPage = ({ onNavigateToAnalysis }) => {
               <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-lg">
                 <Leaf className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold">EcoPackage AI</span>
+              <span className="text-xl font-bold">EcoPackage</span>
             </div>
-            <div className="text-gray-400">
-              © 2024 EcoPackage AI. Building a sustainable future.
-            </div>
+           <div className="text-gray-400 flex gap-4 items-center text-2xl">
+            <ion-icon name="logo-instagram" class="cursor-pointer"></ion-icon>
+            <ion-icon name="logo-twitter" class="cursor-pointer"></ion-icon>
+            <ion-icon name="logo-linkedin" class="cursor-pointer"></ion-icon>
+            <ion-icon name="logo-instagram" class="cursor-pointer"></ion-icon>
+            <ion-icon name="logo-facebook" class="cursor-pointer"></ion-icon>
+          </div>
           </div>
         </div>
       </footer>
