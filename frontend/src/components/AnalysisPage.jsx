@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Search, Loader2, Package, AlertCircle } from 'lucide-react';
 import Dashboard from './Dashboard';
+import RecommendationCard from './RecommendationCard';
 
 const AnalysisPage = ({ onNavigateToLanding }) => {
-  const [itemCodes, setItemCodes] = useState([]);
+  const [items, setItems] = useState([]); // [{ item_code, quantity }]
   const [newItemCode, setNewItemCode] = useState('');
+  const [newQuantity, setNewQuantity] = useState(1);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -14,13 +16,13 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
     setError('');
     setData(null);
     try {
-      const response = await fetch('/api/recommend', {
+      const response = await fetch('http://localhost:3000/package', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          itemCodes: itemCodes.filter(code => code.trim() !== ''),
+          items: items.filter(item => item.item_code.trim() !== '' && item.quantity > 0),
         }),
       });
       if (!response.ok) {
@@ -41,16 +43,22 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
     fetchRecommendation();
   };
 
-  const handleAddItemCode = () => {
+  const handleAddItem = () => {
     const code = newItemCode.trim();
-    if (code && !itemCodes.includes(code)) {
-      setItemCodes((prev) => [...prev, code]);
+    const quantity = Number(newQuantity);
+    if (code && quantity > 0 && !items.some(item => item.item_code === code)) {
+      setItems((prev) => [...prev, { item_code: code, quantity }]);
       setNewItemCode('');
+      setNewQuantity(1);
     }
   };
 
-  const handleRemoveItemCode = (idx) => {
-    setItemCodes((prev) => prev.filter((_, i) => i !== idx));
+  const handleRemoveItem = (idx) => {
+    setItems((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleQuantityChange = (idx, value) => {
+    setItems((prev) => prev.map((item, i) => i === idx ? { ...item, quantity: Number(value) } : item));
   };
 
   return (
@@ -84,7 +92,7 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
               Product Analysis Dashboard
             </h1>
             <p className="text-lg text-gray-600">
-              Enter your product item code to get AI-powered sustainable packaging recommendations
+              Enter your product item code and quantity to get AI-powered sustainable packaging recommendations
             </p>
           </div>
 
@@ -92,7 +100,7 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Item Codes
+                  Product Item Codes & Quantities
                 </label>
                 <div className="flex items-center space-x-2 mb-3">
                   <div className="relative w-full">
@@ -106,25 +114,43 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
                       disabled={loading}
                     />
                   </div>
+                  <input
+                    type="number"
+                    min={1}
+                    value={newQuantity}
+                    onChange={e => setNewQuantity(e.target.value)}
+                    placeholder="Qty"
+                    className="w-24 pl-3 pr-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                    disabled={loading}
+                  />
                   <button
                     type="button"
-                    onClick={handleAddItemCode}
+                    onClick={handleAddItem}
                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-semibold disabled:opacity-50"
-                    disabled={loading || !newItemCode.trim()}
+                    disabled={loading || !newItemCode.trim() || !newQuantity}
                   >
                     Add
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {itemCodes.map((code, idx) => (
+                  {items.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center bg-green-100 border border-green-300 rounded-full px-3 py-1 text-green-800 text-sm font-medium relative shadow-sm"
+                      className="flex items-center bg-green-100 border border-green-300 rounded-full px-3 py-1 text-green-800 text-sm font-medium relative shadow-sm gap-2"
                     >
-                      <span>{code}</span>
+                      <span>{item.item_code}</span>
+                      <input
+                        type="number"
+                        min={1}
+                        value={item.quantity}
+                        onChange={e => handleQuantityChange(idx, e.target.value)}
+                        className="w-14 px-1 py-0.5 border border-green-300 rounded ml-2 text-green-900 bg-white"
+                        style={{ fontSize: '0.95em' }}
+                        disabled={loading}
+                      />
                       <button
                         type="button"
-                        onClick={() => handleRemoveItemCode(idx)}
+                        onClick={() => handleRemoveItem(idx)}
                         className="ml-2 text-green-600 hover:text-red-600 font-bold rounded-full focus:outline-none focus:ring-2 focus:ring-red-400"
                         style={{ lineHeight: 1, fontSize: '1.1em', position: 'relative', top: '-2px' }}
                         aria-label="Remove item code"
@@ -146,7 +172,7 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
 
               <button
                 type="submit"
-                disabled={loading || itemCodes.length === 0}
+                disabled={loading || items.length === 0}
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-6 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
               >
                 {loading ? (
@@ -183,7 +209,19 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
           )}
 
           {/* Results */}
-          {data && !loading && <Dashboard data={data} />}
+          {data && !loading && (
+            <div className="space-y-4">
+              {Array.isArray(data) && data.length > 0 ? (
+                data.map((group, idx) => (
+                  <RecommendationCard key={idx} group={group} />
+                ))
+              ) : (
+                <div className="bg-yellow-50 text-yellow-800 p-4 rounded-lg text-center">
+                  No recommendations found.
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </div>

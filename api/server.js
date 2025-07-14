@@ -9,6 +9,13 @@ app.use(express.json());
 
 const ai = new GoogleGenAI (process.env.GEMINI_API_KEY);
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  next();
+});
+
 app.post("/package", async (req, res) => {
   const items = req.body.items; // [{ item_code, quantity }]
   try {
@@ -50,6 +57,7 @@ Apply these strict rules:
 - Use **real, common packaging materials in India**
 - Keep 'packaging_type' short and clear (e.g., "Jute bag", "Recycled box with molded pulp")
 - Keep 'why_this_is_good' to just **1–2 short lines**
+- Try to group as many items as possible in each recommendation
 
 Return your response in this JSON format:
 

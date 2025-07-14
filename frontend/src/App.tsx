@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import LandingPage from './components/LandingPage';
 import AnalysisPage from './components/AnalysisPage';
-import Dashboard from './components/Dashboard'; // ✅ Import Dashboard
+import Dashboard from './components/Dashboard';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -11,7 +11,8 @@ function App() {
     pageToRender = (
       <LandingPage
         onNavigateToAnalysis={() => setCurrentPage('analysis')}
-        onNavigateToDashboard={() => setCurrentPage('dashboard')} // ✅ Pass this prop
+        onNavigateToDashboard={() => setCurrentPage('dashboard')}
+        onNavigateToPackageOptimizer={() => setCurrentPage('packageOptimizer')}
       />
     );
   } else if (currentPage === 'analysis') {
@@ -21,6 +22,10 @@ function App() {
   } else if (currentPage === 'dashboard') {
     pageToRender = (
       <Dashboard onNavigateToLanding={() => setCurrentPage('landing')} />
+    );
+  } else if (currentPage === 'packageOptimizer') {
+    pageToRender = (
+      <PackageOptimizer />
     );
   }
 

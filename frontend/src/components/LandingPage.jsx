@@ -2,7 +2,7 @@ import React from 'react';
 import { Leaf, Recycle, Shield, Award, ArrowRight, Package, Globe, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const LandingPage = ({ onNavigateToAnalysis, onNavigateToDashboard }) => {
+const LandingPage = ({ onNavigateToAnalysis, onNavigateToDashboard, onNavigateToPackageOptimizer }) => {
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -27,7 +27,14 @@ const LandingPage = ({ onNavigateToAnalysis, onNavigateToDashboard }) => {
                 <span>Go to Dashboard</span>
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>
-
+              <button
+                onClick={onNavigateToPackageOptimizer}
+                className="group bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-2 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
+              >
+                <Globe className="h-5 w-5" />
+                <span>Package Optimizer</span>
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </button>
             </nav>
           </div>
         </div>
