@@ -38,28 +38,31 @@ app.post("/package", async (req, res) => {
     ).join("\n");
 
     // ✅ One prompt for all items
-    const prompt = `
+      const prompt = `
 You are an expert in sustainable packaging optimization.
 
 Here is a list of products to be shipped together:
 ${productListText}
 
-Your task is to recommend the **2–3 most efficient sustainable packaging strategies** for this group, focusing on:
-- Grouping items efficiently **by type**
-- Reducing carbon footprint
-- Cost-effectiveness
-- Recyclability or biodegradability
+Your task is to:
+- First, group the products efficiently by **item category** (e.g., "Cosmetics + Jewelry", "Food", etc.)
+- Then, for **each group**, recommend the **2–3 most sustainable and cost-effective packaging options**
 
-Apply these strict rules:
+Focus on:
+- Reducing carbon footprint
+- Grouping as many items as possible
+- Recyclability or biodegradability
+- Realistic costs (common packaging types in India)
+
+Strict rules:
 - Never pack **electronics** in the same group as **food**
 - Pack **food** only in **breathable, natural materials** (e.g., paper, jute, cloth)
-- Group by **item categories** (e.g., "Cosmetics + Jewelry") instead of item names or codes
-- Use **real, common packaging materials in India**
-- Keep 'packaging_type' short and clear (e.g., "Jute bag", "Recycled box with molded pulp")
-- Keep 'why_this_is_good' to just **1–2 short lines**
-- Try to group as many items as possible in each recommendation
+- Use **real, commonly available packaging materials in India**
+- Keep 'packaging_type' short and realistic (e.g., "Jute bag", "Corrugated box")
+- Keep 'why_this_is_good' to **just 1–2 short lines**
+- Each group must have **at least 2 packaging options**, showing trade-offs in **eco_score, footprint, and cost**
 
-Return your response in this JSON format:
+Return your answer strictly in this JSON format:
 
 [
   {
@@ -68,6 +71,7 @@ Return your response in this JSON format:
     "packaging_type": "Short packaging name only",
     "estimated_total_footprint_kg": 2.5,
     "eco_score": 90,
+    "cost": real world price in INR,
     "why_this_is_good": "One or two-line reason max"
   },
   {
@@ -77,7 +81,7 @@ Return your response in this JSON format:
 `;
 
 
-    const response = await ai.models.generateContent({
+      const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: prompt,
     });

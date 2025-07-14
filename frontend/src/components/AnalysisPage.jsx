@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Search, Loader2, Package, AlertCircle } from 'lucide-react';
 import Dashboard from './Dashboard';
 import RecommendationCard from './RecommendationCard';
+import GroupedRecommendationBox from './GroupedRecommendationBox';
 
 const AnalysisPage = ({ onNavigateToLanding }) => {
   const [items, setItems] = useState([]); // [{ item_code, quantity }]
@@ -59,6 +60,18 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
 
   const handleQuantityChange = (idx, value) => {
     setItems((prev) => prev.map((item, i) => i === idx ? { ...item, quantity: Number(value) } : item));
+  };
+
+  // Helper to group recommendations by group_description
+  const groupByDescription = (dataArr) => {
+    const groups = {};
+    dataArr.forEach(item => {
+      if (!groups[item.group_description]) {
+        groups[item.group_description] = [];
+      }
+      groups[item.group_description].push(item);
+    });
+    return groups;
   };
 
   return (
@@ -210,16 +223,26 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
 
           {/* Results */}
           {data && !loading && (
-            <div className="space-y-4">
-              {Array.isArray(data) && data.length > 0 ? (
-                data.map((group, idx) => (
-                  <RecommendationCard key={idx} group={group} />
-                ))
-              ) : (
-                <div className="bg-yellow-50 text-yellow-800 p-4 rounded-lg text-center">
-                  No recommendations found.
-                </div>
-              )}
+            <div className="space-y-8">
+              {(() => {
+                const grouped = groupByDescription(Array.isArray(data) ? data : []);
+                const groupKeys = Object.keys(grouped);
+                if (groupKeys.length === 0) {
+                  return (
+                    <div className="bg-yellow-50 text-yellow-800 p-4 rounded-lg text-center">
+                      No recommendations found.
+                    </div>
+                  );
+                }
+                return groupKeys.map((desc, idx) => (
+                  <GroupedRecommendationBox
+                    key={idx}
+                    groupDescription={desc}
+                    groupItems={grouped[desc][0]?.group_items}
+                    options={grouped[desc]}
+                  />
+                ));
+              })()}
             </div>
           )}
         </div>
