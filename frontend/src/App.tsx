@@ -1,39 +1,24 @@
-import React, { useState } from 'react';
+// App.tsx
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import LandingPage from './components/LandingPage';
 import AnalysisPage from './components/AnalysisPage';
 import Dashboard from './components/Dashboard';
 import RecyclePage from './components/RecyclePage';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('landing');
-  const [showCreateUser, setShowCreateUser] = useState(false);
-  const [showUserDetails, setShowUserDetails] = useState(false);
-
-  let pageToRender;
-  if (currentPage === 'landing') {
-    pageToRender = (
-      <LandingPage
-        onNavigateToAnalysis={() => setCurrentPage('analysis')}
-        onNavigateToDashboard={() => setCurrentPage('dashboard')}
-        onAddUser={() => setShowCreateUser(true)}
-        onUserDetails={() => setShowUserDetails(true)}
-      />
-    );
-  } else if (currentPage === 'analysis') {
-    pageToRender = (
-      <AnalysisPage onNavigateToLanding={() => setCurrentPage('landing')} />
-    );
-  } else if (currentPage === 'dashboard') {
-    pageToRender = (
-      <Dashboard onNavigateToLanding={() => setCurrentPage('landing')} />
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      {pageToRender}
-      {showCreateUser && <RecyclePage mode="create" onClose={() => setShowCreateUser(false)} />}
-      {showUserDetails && <RecyclePage mode="details" onClose={() => setShowUserDetails(false)} />}
+      <Router>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/analysis" element={<AnalysisPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/user/create" element={<RecyclePage mode="create" onClose={() => window.history.back()} />} />
+          <Route path="/user/details" element={<RecyclePage mode="details" onClose={() => window.history.back()} />} />
+        </Routes>
+      </Router>
     </div>
   );
 }
