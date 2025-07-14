@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Loader2, Package, AlertCircle } from 'lucide-react';
-import Dashboard from './Dashboard';
-import RecommendationCard from './RecommendationCard';
 import GroupedRecommendationBox from './GroupedRecommendationBox';
 
-const AnalysisPage = ({ onNavigateToLanding }) => {
-  const [items, setItems] = useState([]); // [{ item_code, quantity }]
+const AnalysisPage = () => {
+  const [items, setItems] = useState([]);
   const [newItemCode, setNewItemCode] = useState('');
   const [newQuantity, setNewQuantity] = useState(1);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // React Router navigation
 
   const fetchRecommendation = async () => {
     setLoading(true);
@@ -48,21 +48,24 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
     const code = newItemCode.trim();
     const quantity = Number(newQuantity);
     if (code && quantity > 0 && !items.some(item => item.item_code === code)) {
-      setItems((prev) => [...prev, { item_code: code, quantity }]);
+      setItems(prev => [...prev, { item_code: code, quantity }]);
       setNewItemCode('');
       setNewQuantity(1);
     }
   };
 
   const handleRemoveItem = (idx) => {
-    setItems((prev) => prev.filter((_, i) => i !== idx));
+    setItems(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleQuantityChange = (idx, value) => {
-    setItems((prev) => prev.map((item, i) => i === idx ? { ...item, quantity: Number(value) } : item));
+    setItems(prev =>
+      prev.map((item, i) =>
+        i === idx ? { ...item, quantity: Number(value) } : item
+      )
+    );
   };
 
-  // Helper to group recommendations by group_description
   const groupByDescription = (dataArr) => {
     const groups = {};
     dataArr.forEach(item => {
@@ -81,7 +84,7 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             <button
-              onClick={onNavigateToLanding}
+              onClick={() => navigate('/')}
               className="flex items-center space-x-2 text-green-600 hover:text-green-700 transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -133,7 +136,7 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
                     value={newQuantity}
                     onChange={e => setNewQuantity(e.target.value)}
                     placeholder="Qty"
-                    className="w-24 pl-3 pr-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                    className="w-20 pl-3 pr-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                     disabled={loading}
                   />
                   <button
@@ -203,7 +206,7 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
             </form>
           </div>
 
-          {/* Loading State */}
+          {/* Loading UI */}
           {loading && (
             <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
               <div className="flex flex-col items-center space-y-4">
@@ -221,7 +224,7 @@ const AnalysisPage = ({ onNavigateToLanding }) => {
             </div>
           )}
 
-          {/* Results */}
+          {/* Grouped Results */}
           {data && !loading && (
             <div className="space-y-8">
               {(() => {
