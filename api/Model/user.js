@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   number: { type: String, required: true, unique: true }, // number is now unique
   password: { type: String, required: true }, // Optional: if you want to add authentication
-    totalBoxesRecycled: { type: Number, default: 0 },
+  totalBoxesRecycled: { type: Number, default: 0 },
   boxesAvailableToClaim: { type: Number, default: 0 },
   // Optionally, you can add more fields like donation history, timestamps, etc.
 }, { timestamps: true });
