@@ -1,16 +1,19 @@
 import express from 'express';
-import { addBoxes, claimBoxes, getUserByNumber, createUser, getAllUsers } from '../controller/userController.js';
+import { addBoxes, claimBoxes, loginUser, createUser, getAllUsers, getUserByNumber } from '../controller/userController.js';
 
 const router = express.Router();
 
-// Add boxes (donate)
+// Get user by number (for admin)
+router.get('/', getUserByNumber);
+
+// Add boxes (for admin)
 router.post('/add', addBoxes);
 
-// Claim boxes (use)
+// Claim boxes (for user)
 router.post('/use', claimBoxes);
 
-// Get user by number
-router.get('/', getUserByNumber);
+// Login user
+router.post('/login', loginUser);
 
 // Create user
 router.post('/create', createUser);
